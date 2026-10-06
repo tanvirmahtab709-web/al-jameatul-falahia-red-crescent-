@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unit Admin</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body{background:#f4f6f8}.admin-wrap{max-width:900px;margin:50px auto;padding:0 20px}.panel{background:#fff;padding:30px;box-shadow:0 15px 45px rgba(0,0,0,.08);margin-bottom:20px}.panel h2{font-size:28px}.field{display:grid;gap:7px;margin:15px 0}.field label{font-weight:700;font-size:13px}.field input,.field textarea{padding:12px;border:1px solid #dce2e7;font:inherit}.row{display:grid;grid-template-columns:1fr 1fr;gap:15px}.hidden{display:none}.msg{color:#16834b;font-size:13px}.photo-list{display:grid;gap:10px}.photo-item{display:flex;justify-content:space-between;align-items:center;border:1px solid #e1e6eb;padding:10px}.danger{color:#c4141b}.logout{float:right}
+</style>
+</head>
+<body>
+<div class="admin-wrap">
+  <div class="panel" id="loginPanel">
+    <p class="kicker">UNIT ADMIN</p><h2>Admin Login</h2>
+    <p>Use your private administrator password to open the local editor.</p>
+    <div class="field"><label>Password</label><input id="pass" type="password" placeholder="Enter password"></div>
+    <button class="btn btn-red" onclick="login()">Login</button><p id="loginMsg" class="msg"></p>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <div class="panel">
+      <button class="logout btn" onclick="logout()">Log out</button>
+      <p class="kicker">DASHBOARD</p><h2>Unit Website Editor</h2>
+      <p>Edit text below. Changes are saved in this browser. For a real public website where all visitors see the changes, connect this panel to a server/database.</p>
+      <div class="field"><label>Hero title</label><input id="heroTitle"></div>
+      <div class="field"><label>Hero description</label><textarea id="heroDesc" rows="4"></textarea></div>
+      <div class="row">
+        <div class="field"><label>Phone</label><input id="phone"></div>
+        <div class="field"><label>Email</label><input id="email"></div>
+      </div>
+      <div class="field"><label>Address</label><input id="address"></div>
+      <button class="btn btn-red" onclick="saveSettings()">Save Changes</button>
+      <p id="saveMsg" class="msg"></p>
+    </div>
+
+    <div class="panel">
+      <p class="kicker">NEWS MANAGEMENT</p><h2>নিউজ যোগ করুন</h2>
+      <div class="field"><label>নিউজের শিরোনাম</label><input id="newsTitle" placeholder="যেমন: প্রথমিক চিকিৎসা প্রশিক্ষণ অনুষ্ঠিত"></div>
+      <div class="row"><div class="field"><label>তারিখ</label><input id="newsDate" placeholder="০৬ অক্টোবর ২০২৬"></div><div class="field"><label>ক্যাটাগরি</label><input id="newsCategory" placeholder="প্রশিক্ষণ"></div></div>
+      <div class="field"><label>বিস্তারিত</label><textarea id="newsDesc" rows="4" placeholder="নিউজের সংক্ষিপ্ত বিবরণ"></textarea></div>
+      <div class="field"><label>ছবি (ঐচ্ছিক)</label><input id="newsImage" type="file" accept="image/*"></div>
+      <button class="btn btn-red" onclick="addNews()">নিউজ প্রকাশ করুন</button><p id="newsMsg" class="msg"></p>
+      <div id="newsAdminList" class="photo-list"></div>
+    </div>
+
+    <div class="panel">
+      <p class="kicker">MONTHLY REPORT</p><h2>মাসিক রিপোর্ট যোগ করুন</h2>
+      <div class="field"><label>মাস ও বছর</label><input id="reportMonth" placeholder="অক্টোবর ২০২৬"></div>
+      <div class="field"><label>রিপোর্টের সারাংশ</label><textarea id="reportSummary" rows="4" placeholder="এই মাসের কার্যক্রমের সংক্ষিপ্ত বিবরণ"></textarea></div>
+      <div class="field"><label>পরিসংখ্যান / গুরুত্বপূর্ণ তথ্য</label><input id="reportStats" placeholder="৩টি কার্যক্রম • ২টি প্রশিক্ষণ • ২৫ জন অংশগ্রহণকারী"></div>
+      <button class="btn btn-red" onclick="addReport()">রিপোর্ট প্রকাশ করুন</button><p id="reportMsg" class="msg"></p>
+      <div id="reportAdminList" class="photo-list"></div>
+    </div>
+
+    <div class="panel">
+      <p class="kicker">PHOTO MANAGEMENT</p><h2>Gallery Photos</h2>
+      <p>Select images from your computer. They will be saved locally in this browser for this demo editor.</p>
+      <input id="photos" type="file" accept="image/*" multiple>
+      <div id="photoList" class="photo-list"></div>
+    </div>
+
+    <div class="panel">
+      <p class="kicker">SECURITY</p><h2>Important</h2>
+      <p>This starter admin is intentionally a static-site editor. <strong>Do not use it as a production password system</strong>; the password is inside the website code and can be discovered by someone who downloads the site. For a real public admin panel, the site needs server-side authentication/database.</p>
+    </div>
+  </div>
+</div>
+<script>
+const ADMIN_PASSWORD='AJF@2026#RC';
+const defaultNews=[
+  {title:'রেড ক্রিসেন্ট ইউনিটের নতুন সেবা কার্যক্রম',date:'০৫ অক্টোবর ২০২৬',category:'সেবা কার্যক্রম',desc:'শিক্ষার্থী স্বেচ্ছাসেবকদের অংশগ্রহণে মানবিক সহায়তা ও সচেতনতামূলক কার্যক্রম পরিচালিত হয়েছে.'},
+  {title:'প্রথমিক চিকিৎসা ও স্বেচ্ছাসেবক প্রশিক্ষণ',date:'২৮ সেপ্টেম্বর ২০২৬',category:'প্রশিক্ষণ',desc:'ইউনিট সদস্যদের জন্য প্রাথমিক চিকিৎসা, নিরাপত্তা ও জরুরি সাড়া দেওয়ার প্রশিক্ষণ অনুষ্ঠিত হয়েছে.'}
+];
+const defaultReports=[
+  {month:'সেপ্টেম্বর ২০২৬',summary:'এই মাসে প্রশিক্ষণ, সচেতনতা ও মানবিক সেবামূলক একাধিক কার্যক্রম পরিচালিত হয়েছে.',stats:'৩টি কার্যক্রম • ২টি প্রশিক্ষণ • ২৪ জন স্বেচ্ছাসেবক'},
+  {month:'আগস্ট ২০২৬',summary:'স্বেচ্ছাসেবক উন্নয়ন, দলীয় প্রস্তুতি ও কমিউনিটি সেবাকে গুরুত্ব দিয়ে মাসিক কার্যক্রম সম্পন্ন হয়েছে.',stats:'৪টি কার্যক্রম • ১টি ক্যাম্পেইন • ৩০ জন অংশগ্রহণকারী'}
+];
+function login(){if(document.getElementById('pass').value===ADMIN_PASSWORD){localStorage.setItem('ajfAdmin','1');showDash()}else document.getElementById('loginMsg').textContent='পাসওয়ার্ড সঠিক নয়।'}
+function showDash(){document.getElementById('loginPanel').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');loadSettings();renderPhotos();renderNewsAdmin();renderReportsAdmin()}
+function logout(){localStorage.removeItem('ajfAdmin');location.reload()}
+function saveSettings(){const data={heroTitle:heroTitle.value,heroDesc:heroDesc.value,phone:phone.value,email:email.value,address:address.value};localStorage.setItem('ajfSettings',JSON.stringify(data));saveMsg.textContent='ব্রাউজারে সফলভাবে সংরক্ষিত হয়েছে।'}
+function loadSettings(){const d=JSON.parse(localStorage.getItem('ajfSettings')||'{}');heroTitle.value=d.heroTitle||'Serving Humanity. Saving Lives.';heroDesc.value=d.heroDesc||'A student-led Red Crescent Unit committed to humanitarian service.';phone.value=d.phone||'+880 1XXXXXXXXX';email.value=d.email||'unit@example.com';address.value=d.address||'Al Jameatul Falahia Kamil Madrasha'}
+photos.addEventListener('change',()=>{const files=[...photos.files];let arr=JSON.parse(localStorage.getItem('ajfPhotos')||'[]');files.forEach(f=>{const r=new FileReader();r.onload=()=>{arr.push({name:f.name,data:r.result});localStorage.setItem('ajfPhotos',JSON.stringify(arr));renderPhotos()};r.readAsDataURL(f)})});
+function renderPhotos(){const arr=JSON.parse(localStorage.getItem('ajfPhotos')||'[]');photoList.innerHTML=arr.map((p,i)=>`<div class="photo-item"><span>${p.name}</span><button class="danger" onclick="removePhoto(${i})">Remove</button></div>`).join('')||'<small>No custom photos added yet.</small>'}
+function removePhoto(i){let a=JSON.parse(localStorage.getItem('ajfPhotos')||'[]');a.splice(i,1);localStorage.setItem('ajfPhotos',JSON.stringify(a));renderPhotos()}
+function readImage(file){return new Promise(resolve=>{if(!file)return resolve('');const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(file)})}
+function addNews(){const title=newsTitle.value.trim(),date=newsDate.value.trim(),category=newsCategory.value.trim(),desc=newsDesc.value.trim();if(!title||!desc){newsMsg.textContent='শিরোনাম ও বিস্তারিত লিখুন।';return}readImage(newsImage.files[0]).then(img=>{let arr=JSON.parse(localStorage.getItem('ajfNews')||JSON.stringify(defaultNews));arr.unshift({title,date,category,desc,image:img});localStorage.setItem('ajfNews',JSON.stringify(arr));newsTitle.value='';newsDate.value='';newsCategory.value='';newsDesc.value='';newsImage.value='';newsMsg.textContent='নিউজ সফলভাবে যোগ হয়েছে।';renderNewsAdmin()})}
+function renderNewsAdmin(){const arr=JSON.parse(localStorage.getItem('ajfNews')||JSON.stringify(defaultNews));newsAdminList.innerHTML=arr.map((n,i)=>`<div class="photo-item"><span><strong>${n.title}</strong><br><small>${n.date||''} • ${n.category||'নিউজ'}</small></span><button class="danger" onclick="removeNews(${i})">মুছুন</button></div>`).join('')}
+function removeNews(i){let a=JSON.parse(localStorage.getItem('ajfNews')||JSON.stringify(defaultNews));a.splice(i,1);localStorage.setItem('ajfNews',JSON.stringify(a));renderNewsAdmin()}
+function addReport(){const month=reportMonth.value.trim(),summary=reportSummary.value.trim(),stats=reportStats.value.trim();if(!month||!summary){reportMsg.textContent='মাস এবং রিপোর্টের সারাংশ লিখুন।';return}let arr=JSON.parse(localStorage.getItem('ajfReports')||JSON.stringify(defaultReports));arr.unshift({month,summary,stats});localStorage.setItem('ajfReports',JSON.stringify(arr));reportMonth.value='';reportSummary.value='';reportStats.value='';reportMsg.textContent='মাসিক রিপোর্ট সফলভাবে যোগ হয়েছে।';renderReportsAdmin()}
+function renderReportsAdmin(){const arr=JSON.parse(localStorage.getItem('ajfReports')||JSON.stringify(defaultReports));reportAdminList.innerHTML=arr.map((r,i)=>`<div class="photo-item"><span><strong>${r.month}</strong><br><small>${r.stats||''}</small></span><button class="danger" onclick="removeReport(${i})">মুছুন</button></div>`).join('')}
+function removeReport(i){let a=JSON.parse(localStorage.getItem('ajfReports')||JSON.stringify(defaultReports));a.splice(i,1);localStorage.setItem('ajfReports',JSON.stringify(a));renderReportsAdmin()}
+if(localStorage.getItem('ajfAdmin')==='1')showDash();
+</script>
+</body></html>
